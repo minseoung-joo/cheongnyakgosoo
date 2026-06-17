@@ -30,12 +30,7 @@ const TypeTag = ({ type }) => (
   </span>
 );
 
-const StatusBar = () => (
-  <div style={{ height: 44, background: "#1A1A1A", display: "flex", alignItems: "center", padding: "0 20px", justifyContent: "space-between", flexShrink: 0 }}>
-    <span style={{ color: "#fff", fontSize: 12, fontWeight: 600 }}>9:41</span>
-    <span style={{ color: "#fff", fontSize: 11 }}>● ▶ ▮▮</span>
-  </div>
-);
+const StatusBar = () => null;
 
 const BottomTab = ({ active, navigate }) => {
   const tabs = [
@@ -46,12 +41,13 @@ const BottomTab = ({ active, navigate }) => {
     { id: "mypage", label: "마이", icon: "👤" },
   ];
   return (
-    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 72, background: C.surface, borderTop: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-around", paddingBottom: 10 }}>
+    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 68, background: C.primary, display: "flex", alignItems: "center", justifyContent: "space-around", paddingBottom: 8 }}>
       {tabs.map(t => (
         <button key={t.id} onClick={() => navigate(t.id)} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-          <span style={{ fontSize: 20 }}>{t.icon}</span>
-          <span style={{ fontSize: 9, fontWeight: active === t.id ? 700 : 500, color: active === t.id ? C.primary : C.textMuted }}>{t.label}</span>
-          {active === t.id && <div style={{ width: 16, height: 2, background: C.primary, borderRadius: 1 }} />}
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: active === t.id ? "rgba(255,255,255,0.25)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontSize: 20 }}>{t.icon}</span>
+          </div>
+          <span style={{ fontSize: 9, fontWeight: active === t.id ? 800 : 500, color: active === t.id ? "#fff" : "rgba(255,255,255,0.6)" }}>{t.label}</span>
         </button>
       ))}
     </div>
@@ -586,8 +582,8 @@ export default function App() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#E8E4DC", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "-apple-system, sans-serif" }}>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: "#888", letterSpacing: 2 }}>청약고수 · BETA</div>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
+
         <div style={{ width: 390, height: 844, position: "relative", background: C.surface, overflow: "hidden", borderRadius: 44, border: "10px solid #1A1A1A", boxShadow: "0 24px 60px rgba(0,0,0,.25)", display: "flex", flexDirection: "column" }}>
           {screen === "home" && <HomeScreen navigate={navigate} />}
           {screen === "search" && <SearchScreen navigate={navigate} />}
@@ -596,9 +592,7 @@ export default function App() {
           {screen === "community" && <HomeScreen navigate={navigate} />}
           {screen === "mypage" && <MypageScreen navigate={navigate} />}
         </div>
-        <div style={{ fontSize: 11, color: "#aaa", textAlign: "center", lineHeight: 1.8 }}>
-          홈 · 탐색 · 공고상세 · 댓글 · 캘린더 · 마이페이지
-        </div>
+
       </div>
     </div>
   );
