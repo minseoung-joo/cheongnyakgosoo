@@ -258,27 +258,7 @@ const HomeScreen = ({ navigate }) => {
 
   return (
     <div {...swipe} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ height: 56, background: C.surface, borderBottom: `1px solid ${C.border}`, borderTop: `3px solid ${C.primary}`, display: "flex", alignItems: "center", padding: "0 16px", justifyContent: "space-between", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 42, height: 42, borderRadius: 12,
-            background: "#F46B2B",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0,
-          }}>
-            <span style={{
-              color: "#fff", fontSize: 13, fontWeight: 900,
-              letterSpacing: 1.5, fontFamily: "-apple-system, sans-serif",
-              lineHeight: 1,
-            }}>EGO</span>
-          </div>
-          <div style={{ fontSize: 20, fontWeight: 900, color: C.primary, letterSpacing: -0.8, lineHeight: 1 }}>이반고수</div>
-        </div>
-        <div style={{ display: "flex", gap: 6 }}>
-          <button onClick={() => navigate("mypage")} style={{ background: C.bg, border: "none", borderRadius: "50%", width: 34, height: 34, cursor: "pointer", fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center" }}>🔔</button>
-          <button onClick={() => navigate("mypage")} style={{ background: C.bg, border: "none", borderRadius: "50%", width: 34, height: 34, cursor: "pointer", fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center" }}>👤</button>
-        </div>
-      </div>
+      <AppHeader navigate={navigate} />
 
       <div style={{ flex: 1, overflow: "auto", padding: "14px 14px 80px" }}>
         <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", paddingBottom: 2 }}>
@@ -376,9 +356,7 @@ const SearchScreen = ({ navigate }) => {
 
   return (
     <div {...swipe} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ height: 56, background: C.surface, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", padding: "0 16px", flexShrink: 0 }}>
-        <span style={{ fontSize: 18, fontWeight: 800, color: C.textPrimary }}>탐색</span>
-      </div>
+      <AppHeader navigate={navigate} />
       <div style={{ flex: 1, overflow: "auto", padding: "14px 14px 80px" }}>
         <div style={{ background: C.bg, borderRadius: 14, padding: "11px 14px", display: "flex", alignItems: "center", gap: 8, marginBottom: 16, border: `1.5px solid ${C.border}` }}>
           <span style={{ fontSize: 15, color: C.textMuted }}>🔍</span>
@@ -858,10 +836,7 @@ const CalendarScreen = ({ navigate }) => {
 
   return (
     <div {...swipe} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ height: 56, background: C.surface, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", padding: "0 16px", justifyContent: "space-between", flexShrink: 0 }}>
-        <span style={{ fontSize: 18, fontWeight: 800, color: C.textPrimary }}>캘린더</span>
-        <span style={{ fontSize: 12, color: C.textMuted, fontWeight: 500 }}>2026년 6월</span>
-      </div>
+      <AppHeader navigate={navigate} />
       <div style={{ flex: 1, overflow: "auto", padding: "14px 14px 80px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <button style={{ fontSize: 22, color: C.textSecondary, background: "none", border: "none", cursor: "pointer", padding: "0 8px" }}>‹</button>
@@ -915,15 +890,116 @@ const CalendarScreen = ({ navigate }) => {
   );
 };
 
+
+// === 소통 화면 ===
+const CommunityScreen = ({ navigate }) => {
+  const [allComments, setAllComments] = useState([]);
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const swipe = useSwipe(
+    () => navigate("mypage", {}, "left"),
+    () => navigate("calendar", {}, "right")
+  );
+
+  useEffect(() => {
+    Promise.all([
+      supabase.from("comments").select("*").order("created_at", { ascending: false }),
+      supabase.from("listings").select("id, title, agency"),
+    ]).then(([{ data: comments }, { data: listingsData }]) => {
+      if (comments) setAllComments(comments);
+      if (listingsData) setListings(listingsData);
+      setLoading(false);
+    });
+  }, []);
+
+  const getListingTitle = (listingId) => {
+    // 하드코딩 공고 먼저 확인
+    const extra = EXTRA_LISTINGS.find(l => l.id === listingId);
+    if (extra) return { title: extra.title, agency: extra.agency };
+    const found = listings.find(l => String(l.id) === String(listingId));
+    return found ? { title: found.title, agency: found.agency } : { title: "알 수 없는 공고", agency: null };
+  };
+
+  const timeAgo = (d) => {
+    const m = Math.floor((Date.now() - new Date(d)) / 60000);
+    if (m < 1) return "방금";
+    if (m < 60) return `${m}분 전`;
+    if (m < 1440) return `${Math.floor(m/60)}시간 전`;
+    return `${Math.floor(m/1440)}일 전`;
+  };
+
+  return (
+    <div {...swipe} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <AppHeader navigate={navigate} />
+      <div style={{ flex: 1, overflow: "auto", padding: "14px 14px 80px" }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: C.textPrimary, marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ width: 8, height: 8, borderRadius: "50%", background: C.primary, display: "inline-block" }} />
+          전체 댓글
+          <span style={{ fontSize: 11, color: C.textMuted, fontWeight: 500 }}>{allComments.length}개</span>
+        </div>
+
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "60px 0", color: C.textMuted }}>
+            <div style={{ fontSize: 13 }}>불러오는 중...</div>
+          </div>
+        ) : allComments.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "60px 0", color: C.textMuted }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>💬</div>
+            <div style={{ fontSize: 14, fontWeight: 600 }}>아직 댓글이 없어요</div>
+            <div style={{ fontSize: 12, marginTop: 6 }}>공고 상세에서 첫 댓글을 남겨보세요!</div>
+          </div>
+        ) : (
+          allComments.map((c, i) => {
+            const { title, agency } = getListingTitle(c.listing_id);
+            return (
+              <div key={c.id} style={{
+                background: C.surface, borderRadius: 14, padding: "12px 14px",
+                marginBottom: 10, border: `1px solid ${C.border}`,
+                borderTop: `2.5px solid ${C.primaryLight}`,
+                boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+              }}>
+                {/* 공고명 */}
+                <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 8 }}>
+                  {agency && <AgencyTag agency={agency} />}
+                  <span style={{ fontSize: 11, color: C.textSecondary, fontWeight: 600,
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 220 }}>
+                    {title}
+                  </span>
+                </div>
+                {/* 댓글 본문 */}
+                <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                  <div style={{ width: 30, height: 30, background: C.primary, borderRadius: "50%",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 12, color: "#fff", fontWeight: 700, flexShrink: 0 }}>
+                    {c.username?.charAt(0)?.toUpperCase() || "?"}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: C.textPrimary }}>{c.username}</span>
+                      <span style={{ fontSize: 10, color: C.textMuted }}>{timeAgo(c.created_at)}</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: C.textSecondary, lineHeight: 1.6 }}>{c.content}</div>
+                    {c.likes > 0 && (
+                      <div style={{ fontSize: 11, color: C.textMuted, marginTop: 5 }}>🧡 {c.likes}</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+      <BottomTab active="community" navigate={navigate} />
+    </div>
+  );
+};
+
 // === 마이페이지 ===
 const MypageScreen = ({ navigate }) => {
   const swipe = useSwipe(() => {}, () => navigate("community", {}, "right"));
   return (
     <div {...swipe} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ height: 56, background: C.surface, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", padding: "0 16px", justifyContent: "space-between", flexShrink: 0 }}>
-        <span style={{ fontSize: 18, fontWeight: 800, color: C.textPrimary }}>마이</span>
-        <button style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer" }}>⚙</button>
-      </div>
+      <AppHeader navigate={navigate} />
       <div style={{ flex: 1, overflow: "auto", padding: "14px 14px 80px" }}>
         <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, ${C.primaryDark} 100%)`, borderRadius: 18, padding: "20px 16px", marginBottom: 12, display: "flex", gap: 14, alignItems: "center" }}>
           <div style={{ width: 54, height: 54, background: "rgba(255,255,255,0.25)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, border: "2px solid rgba(255,255,255,0.4)" }}>👤</div>
@@ -1039,7 +1115,7 @@ export default function App() {
           {screen === "search"    && <SearchScreen   navigate={navigate} goBack={goBack} />}
           {screen === "detail"    && <DetailScreen   navigate={navigate} goBack={goBack} {...params} />}
           {screen === "calendar"  && <CalendarScreen navigate={navigate} goBack={goBack} />}
-          {screen === "community" && <HomeScreen     navigate={navigate} goBack={goBack} />}
+          {screen === "community" && <CommunityScreen navigate={navigate} goBack={goBack} />}
           {screen === "mypage"    && <MypageScreen   navigate={navigate} goBack={goBack} />}
         </div>
       </div>
