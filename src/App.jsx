@@ -69,7 +69,13 @@ const BottomTab = ({ active, navigate }) => {
   return (
     <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 68, background: "#fff", borderTop: "2px solid #F46B2B", display: "flex", alignItems: "center", justifyContent: "space-around", paddingBottom: 8 }}>
       {tabs.map(t => (
-        <button key={t.id} onClick={() => navigate(t.id)} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+        <button key={t.id} onClick={() => {
+            const tabOrder = ["home","search","calendar","community","mypage"];
+            const curIdx = tabOrder.indexOf(active);
+            const newIdx = tabOrder.indexOf(t.id);
+            const dir = newIdx > curIdx ? "left" : newIdx < curIdx ? "right" : null;
+            navigate(t.id, {}, dir);
+          }} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
           <div style={{ width: 40, height: 34, borderRadius: 10, background: active === t.id ? C.primaryLight : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}>
             <span style={{ fontSize: 22, filter: active === t.id ? "none" : "grayscale(30%) opacity(0.5)" }}>{t.icon}</span>
           </div>
@@ -111,8 +117,8 @@ const HomeScreen = ({ navigate }) => {
   const [bookmarks, setBookmarks] = useState({});
   const filters = ["전체", "LH", "GH", "SH", "공공분양", "공공임대"];
   const swipe = useSwipe(
-    () => navigate("search"),
-    () => navigate("mypage")
+    () => navigate("search", {}, "left"),
+    () => navigate("mypage", {}, "right")
   );
 
   useEffect(() => {
@@ -190,8 +196,8 @@ const SearchScreen = ({ navigate }) => {
   const [selectedRegion, setSelectedRegion] = useState("전체");
   const [bookmarks, setBookmarks] = useState({});
   const swipe = useSwipe(
-    () => navigate("calendar"),
-    () => navigate("home")
+    () => navigate("calendar", {}, "left"),
+    () => navigate("home", {}, "right")
   );
 
   useEffect(() => {
@@ -259,7 +265,7 @@ const SearchScreen = ({ navigate }) => {
 };
 
 // === 공고 상세 화면 ===
-const DetailScreen = ({ navigate, listing: l }) => {
+const DetailScreen = ({ navigate, goBack, listing: l }) => {
   const [activeTab, setActiveTab] = useState("위치");
   const [selectedType, setSelectedType] = useState(l.floor_types?.[0] || "");
   const [bookmarked, setBookmarked] = useState(false);
@@ -310,7 +316,7 @@ const DetailScreen = ({ navigate, listing: l }) => {
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <StatusBar />
       <div style={{ height: 48, background: C.surface, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", padding: "0 14px", gap: 8, flexShrink: 0 }}>
-        <button onClick={() => navigate("home")} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: C.textPrimary, padding: 0, lineHeight: 1 }}>‹</button>
+        <button onClick={goBack} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: C.textPrimary, padding: 0, lineHeight: 1 }}>‹</button>
         <span style={{ fontSize: 15, fontWeight: 600, color: C.textPrimary, flex: 1 }}>공고 상세</span>
         <button onClick={() => setBookmarked(b => !b)} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer" }}>{bookmarked ? "🧡" : "🤍"}</button>
       </div>
@@ -498,8 +504,8 @@ const DetailScreen = ({ navigate, listing: l }) => {
 const CalendarScreen = ({ navigate }) => {
   const [listings, setListings] = useState([]);
   const swipe = useSwipe(
-    () => navigate("community"),
-    () => navigate("search")
+    () => navigate("community", {}, "left"),
+    () => navigate("search", {}, "right")
   );
 
   useEffect(() => {
@@ -573,7 +579,7 @@ const CalendarScreen = ({ navigate }) => {
 const MypageScreen = ({ navigate }) => {
   const swipe = useSwipe(
     () => {},
-    () => navigate("community")
+    () => navigate("community", {}, "right")
   );
   return (
   <div {...swipe} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -615,26 +621,75 @@ const MypageScreen = ({ navigate }) => {
 };
 
 // === 메인 앱 ===
+const TAB_SCREENS = ["home", "search", "calendar", "community", "mypage"];
+
 export default function App() {
   const [screen, setScreen] = useState("home");
   const [params, setParams] = useState({});
+  const [history, setHistory] = useState(["home"]);
+  const [slideDir, setSlideDir] = useState(null); // "left" | "right" | null
+  const [animating, setAnimating] = useState(false);
 
-  const navigate = (screenName, p = {}) => {
-    setScreen(screenName);
-    setParams(p);
+  const navigate = (screenName, p = {}, dir = null) => {
+    if (animating) return;
+    if (dir) {
+      setSlideDir(dir);
+      setAnimating(true);
+      setTimeout(() => {
+        setScreen(screenName);
+        setParams(p || {});
+        setHistory(prev => [...prev, screenName]);
+        setSlideDir(null);
+        setAnimating(false);
+      }, 280);
+    } else {
+      setScreen(screenName);
+      setParams(p || {});
+      setHistory(prev => [...prev, screenName]);
+    }
   };
+
+  const goBack = () => {
+    if (history.length <= 1) return;
+    const newHistory = history.slice(0, -1);
+    const prevScreen = newHistory[newHistory.length - 1];
+    setSlideDir("right");
+    setAnimating(true);
+    setTimeout(() => {
+      setScreen(prevScreen);
+      setParams({});
+      setHistory(newHistory);
+      setSlideDir(null);
+      setAnimating(false);
+    }, 280);
+  };
+
+  const slideStyle = slideDir === "left"
+    ? { animation: "slideInLeft 0.28s ease" }
+    : slideDir === "right"
+    ? { animation: "slideInRight 0.28s ease" }
+    : {};
 
   return (
     <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif" }}>
-      <div style={{ maxWidth: 480, margin: "0 auto", minHeight: "100vh", background: C.surface, position: "relative", display: "flex", flexDirection: "column" }}>
-
-        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-          {screen === "home" && <HomeScreen navigate={navigate} />}
-          {screen === "search" && <SearchScreen navigate={navigate} />}
-          {screen === "detail" && <DetailScreen navigate={navigate} {...params} />}
-          {screen === "calendar" && <CalendarScreen navigate={navigate} />}
-          {screen === "community" && <HomeScreen navigate={navigate} />}
-          {screen === "mypage" && <MypageScreen navigate={navigate} />}
+      <style>{`
+        @keyframes slideInLeft {
+          from { transform: translateX(100%); opacity: 0.7; }
+          to   { transform: translateX(0);    opacity: 1; }
+        }
+        @keyframes slideInRight {
+          from { transform: translateX(-100%); opacity: 0.7; }
+          to   { transform: translateX(0);     opacity: 1; }
+        }
+      `}</style>
+      <div style={{ maxWidth: 480, margin: "0 auto", minHeight: "100vh", background: C.surface, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", ...slideStyle }}>
+          {screen === "home"      && <HomeScreen   navigate={navigate} goBack={goBack} />}
+          {screen === "search"    && <SearchScreen navigate={navigate} goBack={goBack} />}
+          {screen === "detail"    && <DetailScreen navigate={navigate} goBack={goBack} {...params} />}
+          {screen === "calendar"  && <CalendarScreen navigate={navigate} goBack={goBack} />}
+          {screen === "community" && <HomeScreen   navigate={navigate} goBack={goBack} />}
+          {screen === "mypage"    && <MypageScreen navigate={navigate} goBack={goBack} />}
         </div>
       </div>
     </div>
