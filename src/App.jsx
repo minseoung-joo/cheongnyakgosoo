@@ -260,26 +260,18 @@ const HomeScreen = ({ navigate }) => {
     <div {...swipe} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ height: 56, background: C.surface, borderBottom: `1px solid ${C.border}`, borderTop: `3px solid ${C.primary}`, display: "flex", alignItems: "center", padding: "0 16px", justifyContent: "space-between", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {/* EGO 로고 */}
-          <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="egoGrad" x1="0" y1="0" x2="42" y2="42" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#FF8C52"/>
-                <stop offset="100%" stopColor="#C8511A"/>
-              </linearGradient>
-            </defs>
-            <rect width="42" height="42" rx="12" fill="url(#egoGrad)"/>
-            {/* E */}
-            <rect x="7" y="10" width="8" height="2.2" rx="1.1" fill="white"/>
-            <rect x="7" y="10" width="2.2" height="13" rx="1.1" fill="white"/>
-            <rect x="7" y="18.4" width="6.5" height="2" rx="1" fill="white"/>
-            <rect x="7" y="20.8" width="8" height="2.2" rx="1.1" fill="white"/>
-            {/* G */}
-            <path d="M19 16.5 C19 12.9 22 10 25.5 10 C27.5 10 29.2 10.9 30.4 12.3 L28.6 13.8 C27.9 13 26.8 12.5 25.5 12.5 C23.4 12.5 21.7 14.2 21.7 16.5 C21.7 18.8 23.4 20.5 25.5 20.5 C26.8 20.5 27.9 19.9 28.6 19 L26.8 19 L26.8 16.8 L31 16.8 L31 22.8 C29.6 23.7 27.6 23.5 25.5 23.5 C22 23.5 19 20.4 19 16.5 Z" fill="white"/>
-            {/* 하단 O 느낌 장식선 */}
-            <rect x="7" y="27" width="28" height="2" rx="1" fill="white" opacity="0.35"/>
-            <rect x="7" y="31" width="18" height="2" rx="1" fill="white" opacity="0.18"/>
-          </svg>
+          <div style={{
+            width: 42, height: 42, borderRadius: 12,
+            background: "#F46B2B",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0,
+          }}>
+            <span style={{
+              color: "#fff", fontSize: 13, fontWeight: 900,
+              letterSpacing: 1.5, fontFamily: "-apple-system, sans-serif",
+              lineHeight: 1,
+            }}>EGO</span>
+          </div>
           <div style={{ fontSize: 20, fontWeight: 900, color: C.primary, letterSpacing: -0.8, lineHeight: 1 }}>이반고수</div>
         </div>
         <div style={{ display: "flex", gap: 6 }}>
