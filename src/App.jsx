@@ -433,8 +433,8 @@ const SearchScreen = ({ navigate }) => {
 };
 
 // === 공고 상세 화면 ===
-const DetailScreen = ({ navigate, goBack, listing: l }) => {
-  const [activeTab, setActiveTab] = useState("위치");
+const DetailScreen = ({ navigate, goBack, listing: l, initialTab }) => {
+  const [activeTab, setActiveTab] = useState(initialTab || "위치");
   const [selectedType, setSelectedType] = useState(l.floor_types?.[0] || "");
   const [bookmarked, setBookmarked] = useState(false);
   const [comments, setComments] = useState([]);
@@ -935,7 +935,7 @@ const CommunityScreen = ({ navigate }) => {
   useEffect(() => {
     Promise.all([
       supabase.from("comments").select("*").order("created_at", { ascending: false }),
-      supabase.from("listings").select("id, title, agency"),
+      supabase.from("listings").select("*"),
     ]).then(([{ data: comments }, { data: listingsData }]) => {
       if (comments) setAllComments(comments);
       if (listingsData) setListings(listingsData);
@@ -943,12 +943,11 @@ const CommunityScreen = ({ navigate }) => {
     });
   }, []);
 
-  const getListingTitle = (listingId) => {
-    // 하드코딩 공고 먼저 확인
+  const getListing = (listingId) => {
     const extra = EXTRA_LISTINGS.find(l => l.id === listingId);
-    if (extra) return { title: extra.title, agency: extra.agency };
+    if (extra) return extra;
     const found = listings.find(l => String(l.id) === String(listingId));
-    return found ? { title: found.title, agency: found.agency } : { title: "알 수 없는 공고", agency: null };
+    return found || null;
   };
 
   const timeAgo = (d) => {
@@ -981,21 +980,31 @@ const CommunityScreen = ({ navigate }) => {
           </div>
         ) : (
           allComments.map((c, i) => {
-            const { title, agency } = getListingTitle(c.listing_id);
+            const listing = getListing(c.listing_id);
+            const title = listing?.title || "알 수 없는 공고";
+            const agency = listing?.agency || null;
             return (
-              <div key={c.id} style={{
-                background: C.surface, borderRadius: 14, padding: "12px 14px",
-                marginBottom: 10, border: `1px solid ${C.border}`,
-                borderTop: `2.5px solid ${C.primaryLight}`,
-                boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-              }}>
-                {/* 공고명 */}
+              <div key={c.id}
+                onClick={() => { if (listing) navigate("detail", { listing, initialTab: "댓글" }); }}
+                style={{
+                  background: C.surface, borderRadius: 14, padding: "12px 14px",
+                  marginBottom: 10, border: `1px solid ${C.border}`,
+                  borderTop: `2.5px solid ${C.primaryLight}`,
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+                  cursor: listing ? "pointer" : "default",
+                  transition: "box-shadow 0.15s",
+                }}
+                onMouseEnter={e => { if(listing) e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.10)"; }}
+                onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.05)"; }}
+              >
+                {/* 공고명 + 화살표 */}
                 <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 8 }}>
                   {agency && <AgencyTag agency={agency} />}
                   <span style={{ fontSize: 11, color: C.textSecondary, fontWeight: 600,
-                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 220 }}>
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
                     {title}
                   </span>
+                  {listing && <span style={{ fontSize: 13, color: C.textMuted, flexShrink: 0 }}>›</span>}
                 </div>
                 {/* 댓글 본문 */}
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
