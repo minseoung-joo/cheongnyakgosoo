@@ -151,7 +151,7 @@ const ListingCard = ({ listing: l, bookmarked, onBookmark, onClick }) => (
         <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 11, marginTop: 2 }}>{l.location}</div>
       </div>
     </div>
-    <div style={{ padding: "10px 14px" }}>
+    <div style={{ padding: "10px 14px", borderTop: `2.5px solid ${C.primaryLight}` }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <div style={{ fontSize: 11, color: C.textSecondary }}>전용 {l.area} · {l.units}세대</div>
@@ -194,7 +194,17 @@ const BottomTab = ({ active, navigate }) => {
             flex: 1, display: "flex", flexDirection: "column",
             alignItems: "center", gap: 2,
             background: "none", border: "none", cursor: "pointer", padding: "4px 0",
+            position: "relative",
           }}>
+            {/* 활성 탭 상단 주황 인디케이터 */}
+            {isActive && (
+              <div style={{
+                position: "absolute", top: -7, left: "50%",
+                transform: "translateX(-50%)",
+                width: 28, height: 3, borderRadius: "0 0 3px 3px",
+                background: C.primary,
+              }} />
+            )}
             <div style={{
               width: 44, height: 28, borderRadius: 14,
               background: isActive ? C.primaryLight : "transparent",
@@ -248,15 +258,27 @@ const HomeScreen = ({ navigate }) => {
 
   return (
     <div {...swipe} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ height: 56, background: C.surface, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", padding: "0 16px", justifyContent: "space-between", flexShrink: 0 }}>
+      <div style={{ height: 56, background: C.surface, borderBottom: `1px solid ${C.border}`, borderTop: `3px solid ${C.primary}`, display: "flex", alignItems: "center", padding: "0 16px", justifyContent: "space-between", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {/* EGO 로고 */}
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="36" height="36" rx="10" fill="#F46B2B"/>
-            <text x="18" y="14" textAnchor="middle" fill="white" fontSize="7.5" fontWeight="800" fontFamily="-apple-system, sans-serif" letterSpacing="1">EGO</text>
-            <rect x="7" y="17" width="22" height="1.5" rx="0.75" fill="white" opacity="0.6"/>
-            <rect x="7" y="21" width="15" height="1.5" rx="0.75" fill="white" opacity="0.35"/>
-            <rect x="7" y="25" width="19" height="1.5" rx="0.75" fill="white" opacity="0.2"/>
+          <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="egoGrad" x1="0" y1="0" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#FF8C52"/>
+                <stop offset="100%" stopColor="#C8511A"/>
+              </linearGradient>
+            </defs>
+            <rect width="42" height="42" rx="12" fill="url(#egoGrad)"/>
+            {/* E */}
+            <rect x="7" y="10" width="8" height="2.2" rx="1.1" fill="white"/>
+            <rect x="7" y="10" width="2.2" height="13" rx="1.1" fill="white"/>
+            <rect x="7" y="18.4" width="6.5" height="2" rx="1" fill="white"/>
+            <rect x="7" y="20.8" width="8" height="2.2" rx="1.1" fill="white"/>
+            {/* G */}
+            <path d="M19 16.5 C19 12.9 22 10 25.5 10 C27.5 10 29.2 10.9 30.4 12.3 L28.6 13.8 C27.9 13 26.8 12.5 25.5 12.5 C23.4 12.5 21.7 14.2 21.7 16.5 C21.7 18.8 23.4 20.5 25.5 20.5 C26.8 20.5 27.9 19.9 28.6 19 L26.8 19 L26.8 16.8 L31 16.8 L31 22.8 C29.6 23.7 27.6 23.5 25.5 23.5 C22 23.5 19 20.4 19 16.5 Z" fill="white"/>
+            {/* 하단 O 느낌 장식선 */}
+            <rect x="7" y="27" width="28" height="2" rx="1" fill="white" opacity="0.35"/>
+            <rect x="7" y="31" width="18" height="2" rx="1" fill="white" opacity="0.18"/>
           </svg>
           <div style={{ fontSize: 20, fontWeight: 900, color: C.primary, letterSpacing: -0.8, lineHeight: 1 }}>이반고수</div>
         </div>
@@ -299,6 +321,7 @@ const HomeScreen = ({ navigate }) => {
             {rest.length > 0 && (
               <>
                 <div style={{ fontSize: 13, fontWeight: 800, color: C.textPrimary, margin: "4px 0 10px", display: "flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: C.primary, display: "inline-block", flexShrink: 0 }} />
                   <span>최신 공고</span>
                   <span style={{ fontSize: 11, color: C.textMuted, fontWeight: 500 }}>{rest.length}건</span>
                 </div>
