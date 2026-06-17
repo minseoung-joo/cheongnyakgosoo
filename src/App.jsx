@@ -23,7 +23,7 @@ const EXTRA_LISTINGS = [
     move_in: "추후 안내",
     description: "의정부시 탑석센트럴자이 재건축 단지 내 장기전세주택 27세대 공급. 49A·49B·49C 통합 49형 단일 타입. 임대보증금 211,901,000원(임대료 전환 불가). 최장 20년 거주 가능(분양전환 없음). 1순위: 의정부시 거주자. GH주택청약센터 인터넷 신청 전용(모바일 불가).",
     floor_types: ["49A", "49B", "49C"],
-    img_url: null,
+    img_url: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&q=80",
     apply_url: "https://apply.gh.or.kr",
   },
   {
@@ -42,7 +42,7 @@ const EXTRA_LISTINGS = [
     move_in: "2028년 1월(예정)",
     description: "고양창릉 공공주택지구 A-4블록. 신혼부부·한부모가족 계층 전용 행복주택 297세대. 55A·55B·55C 타입. 임대보증금 152,400~153,200천원 / 월임대료 635,000~638,330원. 무자녀 최대 10년, 유자녀 최대 14년 거주. 맞벌이 소득기준 130% 이하. LH청약플러스(PC·모바일) 신청 가능.",
     floor_types: ["55A", "55AH", "55B", "55BH", "55C"],
-    img_url: null,
+    img_url: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80",
     apply_url: "https://apply.lh.or.kr/lhapply/main.do",
   },
 ];
@@ -54,6 +54,19 @@ const getApplyUrl = (agency) => {
   if (a === "LH") return "https://apply.lh.or.kr/lhapply/main.do";
   if (a === "SH") return "https://www.i-sh.co.kr/app/index.do";
   return "https://apply.gh.or.kr"; // GH default
+};
+
+// 기관/타입별 기본 이미지
+const getDefaultImg = (listing) => {
+  if (listing.img_url) return listing.img_url;
+  const a = listing.agency?.toUpperCase();
+  const t = listing.type || "";
+  if (t.includes("장기전세")) return "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&q=80";
+  if (t.includes("행복주택")) return "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80";
+  if (a === "GH") return "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80";
+  if (a === "LH") return "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=80";
+  if (a === "SH") return "https://images.unsplash.com/photo-1464082354059-27db6ce50048?w=600&q=80";
+  return "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80";
 };
 
 const C = {
@@ -120,37 +133,25 @@ const ListingCard = ({ listing: l, bookmarked, onBookmark, onClick }) => (
     onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.10)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
     onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)"; e.currentTarget.style.transform = "translateY(0)"; }}
   >
-    {l.img_url && (
-      <div style={{ position: "relative" }}>
-        <img src={l.img_url} alt="" style={{ width: "100%", height: 110, objectFit: "cover", display: "block" }}
-          onError={e => { e.target.parentElement.style.display = "none"; }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.35) 100%)" }} />
-        <div style={{ position: "absolute", top: 10, left: 10, display: "flex", gap: 5 }}>
-          <AgencyTag agency={l.agency} />
-          <TypeTag type={l.type} />
-        </div>
-        {l.dday != null && (
-          <div style={{ position: "absolute", top: 10, right: 10 }}>
-            <DdayBadge dday={l.dday} />
-          </div>
-        )}
-        <div style={{ position: "absolute", bottom: 8, left: 12, right: 12 }}>
-          <div style={{ color: "#fff", fontSize: 14, fontWeight: 700, lineHeight: 1.35, textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>{l.title}</div>
-          <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 11, marginTop: 2 }}>{l.location}</div>
-        </div>
+    <div style={{ position: "relative" }}>
+      <img src={getDefaultImg(l)} alt="" style={{ width: "100%", height: 110, objectFit: "cover", display: "block" }}
+        onError={e => { e.target.style.display = "none"; }} />
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.42) 100%)" }} />
+      <div style={{ position: "absolute", top: 10, left: 10, display: "flex", gap: 5 }}>
+        <AgencyTag agency={l.agency} />
+        <TypeTag type={l.type} />
       </div>
-    )}
-    <div style={{ padding: "10px 14px" }}>
-      {!l.img_url && (
-        <div style={{ marginBottom: 5 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 4, flexWrap: "wrap" }}>
-            <AgencyTag agency={l.agency} /><TypeTag type={l.type} />
-            {l.dday != null && <DdayBadge dday={l.dday} />}
-          </div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: C.textPrimary, marginTop: 4, lineHeight: 1.4 }}>{l.title}</div>
-          <div style={{ fontSize: 11, color: C.textMuted, marginTop: 2 }}>{l.location}</div>
+      {l.dday != null && (
+        <div style={{ position: "absolute", top: 10, right: 10 }}>
+          <DdayBadge dday={l.dday} />
         </div>
       )}
+      <div style={{ position: "absolute", bottom: 8, left: 12, right: 12 }}>
+        <div style={{ color: "#fff", fontSize: 14, fontWeight: 700, lineHeight: 1.35, textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>{l.title}</div>
+        <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 11, marginTop: 2 }}>{l.location}</div>
+      </div>
+    </div>
+    <div style={{ padding: "10px 14px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <div style={{ fontSize: 11, color: C.textSecondary }}>전용 {l.area} · {l.units}세대</div>
@@ -248,9 +249,16 @@ const HomeScreen = ({ navigate }) => {
   return (
     <div {...swipe} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ height: 56, background: C.surface, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", padding: "0 16px", justifyContent: "space-between", flexShrink: 0 }}>
-        <div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* EGO 로고 */}
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="36" height="36" rx="10" fill="#F46B2B"/>
+            <text x="18" y="14" textAnchor="middle" fill="white" fontSize="7.5" fontWeight="800" fontFamily="-apple-system, sans-serif" letterSpacing="1">EGO</text>
+            <rect x="7" y="17" width="22" height="1.5" rx="0.75" fill="white" opacity="0.6"/>
+            <rect x="7" y="21" width="15" height="1.5" rx="0.75" fill="white" opacity="0.35"/>
+            <rect x="7" y="25" width="19" height="1.5" rx="0.75" fill="white" opacity="0.2"/>
+          </svg>
           <div style={{ fontSize: 20, fontWeight: 900, color: C.primary, letterSpacing: -0.8, lineHeight: 1 }}>이반고수</div>
-          <div style={{ fontSize: 10, color: C.textMuted, letterSpacing: 0.2, marginTop: 1 }}>공공청약 정보 한눈에</div>
         </div>
         <div style={{ display: "flex", gap: 6 }}>
           <button onClick={() => navigate("mypage")} style={{ background: C.bg, border: "none", borderRadius: "50%", width: 34, height: 34, cursor: "pointer", fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center" }}>🔔</button>
