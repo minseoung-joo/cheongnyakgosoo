@@ -245,7 +245,7 @@ const HomeScreen = ({ navigate }) => {
 
   useEffect(() => {
     supabase.from("listings").select("*").order("created_at", { ascending: false })
-      .then(({ data }) => { if (data) setDbListings(data); setLoading(false); });
+      .then(({ data }) => { if (data) setDbListings(data.filter(l => !l.title?.includes('위례') && !l.title?.includes('마포'))); setLoading(false); });
   }, []);
 
   // DB 공고 + 하드코딩 공고 합치기 (중복 방지)
@@ -352,7 +352,7 @@ const SearchScreen = ({ navigate }) => {
 
   useEffect(() => {
     supabase.from("listings").select("*").order("created_at", { ascending: false })
-      .then(({ data }) => { if (data) setDbListings(data); });
+      .then(({ data }) => { if (data) setDbListings(data.filter(l => !l.title?.includes('위례') && !l.title?.includes('마포'))); });
   }, []);
 
   const allListings = [...dbListings, ...EXTRA_LISTINGS];
