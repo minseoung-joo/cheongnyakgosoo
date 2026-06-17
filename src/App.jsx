@@ -103,7 +103,7 @@ const ListingCard = ({ listing: l, bookmarked, onBookmark, onClick }) => (
   </div>
 );
 
-// ── 홈 화면 ──────────────────────────────────────────────────
+// === 홈 화면 ===
 const HomeScreen = ({ navigate }) => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -182,7 +182,7 @@ const HomeScreen = ({ navigate }) => {
   );
 };
 
-// ── 탐색 화면 ────────────────────────────────────────────────
+// === 탐색 화면 ===
 const SearchScreen = ({ navigate }) => {
   const [listings, setListings] = useState([]);
   const [query, setQuery] = useState("");
@@ -258,7 +258,7 @@ const SearchScreen = ({ navigate }) => {
   );
 };
 
-// ── 공고 상세 화면 ───────────────────────────────────────────
+// === 공고 상세 화면 ===
 const DetailScreen = ({ navigate, listing: l }) => {
   const [activeTab, setActiveTab] = useState("위치");
   const [selectedType, setSelectedType] = useState(l.floor_types?.[0] || "");
@@ -494,7 +494,7 @@ const DetailScreen = ({ navigate, listing: l }) => {
   );
 };
 
-// ── 캘린더 화면 ──────────────────────────────────────────────
+// === 캘린더 화면 ===
 const CalendarScreen = ({ navigate }) => {
   const [listings, setListings] = useState([]);
   const swipe = useSwipe(
@@ -569,7 +569,7 @@ const CalendarScreen = ({ navigate }) => {
   );
 };
 
-// ── 마이페이지 ───────────────────────────────────────────────
+// === 마이페이지 ===
 const MypageScreen = ({ navigate }) => {
   const swipe = useSwipe(
     () => {},
@@ -614,7 +614,7 @@ const MypageScreen = ({ navigate }) => {
   );
 };
 
-// ── 메인 앱 ─────────────────────────────────────────────────
+// === 메인 앱 ===
 export default function App() {
   const [screen, setScreen] = useState("home");
   const [params, setParams] = useState({});
@@ -629,12 +629,12 @@ export default function App() {
       <div style={{ maxWidth: 480, margin: "0 auto", minHeight: "100vh", background: C.surface, position: "relative", display: "flex", flexDirection: "column" }}>
 
         <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+          {screen === "home" && <HomeScreen navigate={navigate} />}
           {screen === "search" && <SearchScreen navigate={navigate} />}
           {screen === "detail" && <DetailScreen navigate={navigate} {...params} />}
           {screen === "calendar" && <CalendarScreen navigate={navigate} />}
           {screen === "community" && <HomeScreen navigate={navigate} />}
           {screen === "mypage" && <MypageScreen navigate={navigate} />}
-        </div>
         </div>
       </div>
     </div>
