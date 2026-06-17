@@ -221,6 +221,37 @@ const BottomTab = ({ active, navigate }) => {
   );
 };
 
+// === 공통 헤더 ===
+const AppHeader = ({ navigate }) => (
+  <div style={{
+    height: 56, background: C.surface,
+    borderBottom: `1px solid ${C.border}`,
+    borderTop: `3px solid ${C.primary}`,
+    display: "flex", alignItems: "center",
+    padding: "0 16px", justifyContent: "space-between", flexShrink: 0
+  }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div style={{
+        width: 42, height: 42, borderRadius: 12,
+        background: "#F46B2B",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        flexShrink: 0,
+      }}>
+        <span style={{
+          color: "#fff", fontSize: 13, fontWeight: 900,
+          letterSpacing: 1.5, fontFamily: "-apple-system, sans-serif",
+          lineHeight: 1,
+        }}>EGO</span>
+      </div>
+      <div style={{ fontSize: 20, fontWeight: 900, color: C.primary, letterSpacing: -0.8, lineHeight: 1 }}>이반고수</div>
+    </div>
+    <div style={{ display: "flex", gap: 6 }}>
+      <button onClick={() => navigate("mypage")} style={{ background: C.bg, border: "none", borderRadius: "50%", width: 34, height: 34, cursor: "pointer", fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center" }}>🔔</button>
+      <button onClick={() => navigate("mypage")} style={{ background: C.bg, border: "none", borderRadius: "50%", width: 34, height: 34, cursor: "pointer", fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center" }}>👤</button>
+    </div>
+  </div>
+);
+
 const SkeletonCard = () => (
   <div style={{ background: C.surface, borderRadius: 16, border: `1px solid ${C.border}`, marginBottom: 10, overflow: "hidden" }}>
     <div style={{ height: 110, background: "linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)", backgroundSize: "200% 100%", animation: "shimmer 1.4s infinite" }} />
