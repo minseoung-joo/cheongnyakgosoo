@@ -1,9 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = "https://cuzzllpqkyphjztpbkat.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1enpsbHBxa3lwaGp6dHBia2F0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MzkyNzYsImV4cCI6MjA5NzIxNTI3Nn0.4lI64m_SnNoRj0rXiy1O2fvXLe6h01ogJhkJYnCcCUs";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const TAB_ORDER = ["home", "search", "calendar", "community", "mypage"];
+
+const useSwipe = (onSwipeLeft, onSwipeRight) => {
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
+
+  const onTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const onTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      if (dx < 0) onSwipeLeft();
+      else onSwipeRight();
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
+  return { onTouchStart, onTouchEnd };
+};
 
 const C = {
   primary: "#F46B2B", primaryLight: "#FFF0E8", primaryDark: "#C8511A",
@@ -41,13 +67,13 @@ const BottomTab = ({ active, navigate }) => {
     { id: "mypage", label: "마이", icon: "👤" },
   ];
   return (
-    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 68, background: C.primary, display: "flex", alignItems: "center", justifyContent: "space-around", paddingBottom: 8 }}>
+    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 68, background: "#fff", borderTop: "2px solid #F46B2B", display: "flex", alignItems: "center", justifyContent: "space-around", paddingBottom: 8 }}>
       {tabs.map(t => (
-        <button key={t.id} onClick={() => navigate(t.id)} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: active === t.id ? "rgba(255,255,255,0.25)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ fontSize: 20 }}>{t.icon}</span>
+        <button key={t.id} onClick={() => navigate(t.id)} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+          <div style={{ width: 40, height: 34, borderRadius: 10, background: active === t.id ? C.primaryLight : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}>
+            <span style={{ fontSize: 22, filter: active === t.id ? "none" : "grayscale(30%) opacity(0.5)" }}>{t.icon}</span>
           </div>
-          <span style={{ fontSize: 9, fontWeight: active === t.id ? 800 : 500, color: active === t.id ? "#fff" : "rgba(255,255,255,0.6)" }}>{t.label}</span>
+          <span style={{ fontSize: 9, fontWeight: active === t.id ? 800 : 500, color: active === t.id ? C.primary : "#BDBDBD" }}>{t.label}</span>
         </button>
       ))}
     </div>
@@ -84,6 +110,10 @@ const HomeScreen = ({ navigate }) => {
   const [activeFilter, setActiveFilter] = useState("전체");
   const [bookmarks, setBookmarks] = useState({});
   const filters = ["전체", "LH", "GH", "SH", "공공분양", "공공임대"];
+  const swipe = useSwipe(
+    () => navigate("search"),
+    () => navigate("mypage")
+  );
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -103,7 +133,7 @@ const HomeScreen = ({ navigate }) => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div {...swipe} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <StatusBar />
       <div style={{ height: 52, background: C.surface, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", padding: "0 16px", justifyContent: "space-between", flexShrink: 0 }}>
         <span style={{ fontSize: 20, fontWeight: 800, color: C.primary, letterSpacing: -0.5 }}>청약고수</span>
@@ -159,6 +189,10 @@ const SearchScreen = ({ navigate }) => {
   const [selectedAgency, setSelectedAgency] = useState("전체");
   const [selectedRegion, setSelectedRegion] = useState("전체");
   const [bookmarks, setBookmarks] = useState({});
+  const swipe = useSwipe(
+    () => navigate("calendar"),
+    () => navigate("home")
+  );
 
   useEffect(() => {
     const fetch = async () => {
@@ -190,7 +224,7 @@ const SearchScreen = ({ navigate }) => {
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div {...swipe} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <StatusBar />
       <div style={{ height: 52, background: C.surface, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", padding: "0 16px", flexShrink: 0 }}>
         <span style={{ fontSize: 18, fontWeight: 700, color: C.textPrimary }}>탐색</span>
@@ -463,6 +497,10 @@ const DetailScreen = ({ navigate, listing: l }) => {
 // ── 캘린더 화면 ──────────────────────────────────────────────
 const CalendarScreen = ({ navigate }) => {
   const [listings, setListings] = useState([]);
+  const swipe = useSwipe(
+    () => navigate("community"),
+    () => navigate("search")
+  );
 
   useEffect(() => {
     const fetch = async () => {
@@ -476,7 +514,7 @@ const CalendarScreen = ({ navigate }) => {
   const eventDays = [16, 17, 18, 19, 30];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div {...swipe} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <StatusBar />
       <div style={{ height: 52, background: C.surface, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", padding: "0 16px", justifyContent: "space-between", flexShrink: 0 }}>
         <span style={{ fontSize: 18, fontWeight: 700, color: C.textPrimary }}>캘린더</span>
@@ -532,8 +570,13 @@ const CalendarScreen = ({ navigate }) => {
 };
 
 // ── 마이페이지 ───────────────────────────────────────────────
-const MypageScreen = ({ navigate }) => (
-  <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+const MypageScreen = ({ navigate }) => {
+  const swipe = useSwipe(
+    () => {},
+    () => navigate("community")
+  );
+  return (
+  <div {...swipe} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
     <StatusBar />
     <div style={{ height: 52, background: C.surface, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", padding: "0 16px", justifyContent: "space-between", flexShrink: 0 }}>
       <span style={{ fontSize: 18, fontWeight: 700, color: C.textPrimary }}>마이</span>
@@ -568,7 +611,8 @@ const MypageScreen = ({ navigate }) => (
     </div>
     <BottomTab active="mypage" navigate={navigate} />
   </div>
-);
+  );
+};
 
 // ── 메인 앱 ─────────────────────────────────────────────────
 export default function App() {
@@ -581,18 +625,17 @@ export default function App() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#E8E4DC", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "-apple-system, sans-serif" }}>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
+    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, sans-serif" }}>
+      <div style={{ maxWidth: 480, margin: "0 auto", minHeight: "100vh", background: C.surface, position: "relative", display: "flex", flexDirection: "column" }}>
 
-        <div style={{ width: 390, height: 844, position: "relative", background: C.surface, overflow: "hidden", borderRadius: 44, border: "10px solid #1A1A1A", boxShadow: "0 24px 60px rgba(0,0,0,.25)", display: "flex", flexDirection: "column" }}>
-          {screen === "home" && <HomeScreen navigate={navigate} />}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
           {screen === "search" && <SearchScreen navigate={navigate} />}
           {screen === "detail" && <DetailScreen navigate={navigate} {...params} />}
           {screen === "calendar" && <CalendarScreen navigate={navigate} />}
           {screen === "community" && <HomeScreen navigate={navigate} />}
           {screen === "mypage" && <MypageScreen navigate={navigate} />}
         </div>
-
+        </div>
       </div>
     </div>
   );
